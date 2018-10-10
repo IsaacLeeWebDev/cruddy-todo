@@ -27,7 +27,10 @@ describe('getNextUniqueId', () => {
   beforeEach(cleanTestDatastore);
 
   it('should use error first callback pattern', (done) => {
+    console.log('hello world!!');
     counter.getNextUniqueId((err, id) => {
+      console.log('TEST err:', err);
+      console.log('TEST id:', id);
       expect(err).to.be.null;
       expect(id).to.exist;
       done();

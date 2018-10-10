@@ -20,7 +20,7 @@ const zeroPaddedNumber = (num) => {
   // num = 5 => 00005
   // num = 0 => 00000 
   // num 100000000 => 100000000
-
+  console.log('zeroPaddedNumber has been invoked!');
   return sprintf('%05d', num); 
 };
 
@@ -28,19 +28,22 @@ const zeroPaddedNumber = (num) => {
 // presumably is a callback function.
 // Overall effect: gets the value of the file containing the last id created. (e.g. '00001')
 const readCounter = (callback) => {
+  console.log('readCounter invoked!');
 
   // invoke fs.readFile() passing in some property of exports, anda callback function
   // the value of exports.counterFile is some unknown value that we'll grab from a file we'll create later... ?
   // the callback is an error-first request handler?
   fs.readFile(exports.counterFile, (err, fileData) => {
     // if there's an error
+    console.log('readFile was invoked!');
     if (err) {
       // pass null in for 'err' and 0 in for 'fileData'
-      callback(err, 0);
-
+      console.log('readFile threw an error!');
+      callback(null, 0);
     // if there isn't an error
     } else {
-      console.log('hi');
+      console.log('readFile fileData ====', fileData);
+      console.log('readFile is passing in ', Number(fileData));
       // pass null in for 'err' and new number of whatever the value of 'fileData' is that got passed in.
       // (?) fs.readFile will pass a value from exports.counterFile into both err and fileData.
       callback(null, Number(fileData));
@@ -56,13 +59,17 @@ const writeCounter = (count, callback) => {
 
   // instantiate a new variable called counterString.
   // the value is what is returned by zeroPaddedNumber() when you pass in the value of the count parameter.
+  console.log('writeCounter has been invoked!');
   var counterString = zeroPaddedNumber(count);
-  
+  console.log('before writeFile counterString ===', counterString);
   // invoke fs.writeFile, passing in exports.counterFile, which is presumably a count, and counterString, which
   // is the zero-padded, string form of the count, and a callback function, which looks like an error handler
   fs.writeFile(exports.counterFile, counterString, (err) => {
 
     // if there's an error
+    console.log('writeCounter Error === ', err);
+    console.log('writeCounter counterString === ', counterString);
+
     if (err) {
       // throw this message
       throw ('error writing counter');
@@ -74,6 +81,10 @@ const writeCounter = (count, callback) => {
     }
   });
 };
+
+// let fs.writeFile = (filePath, id, callback) {
+  // do stuff
+//}
 
 // Public API - Fix this function //////////////////////////////////////////////
 
@@ -93,21 +104,17 @@ const writeCounter = (count, callback) => {
   
 //
 
-var testFunction = (value, value2) => {
-  console.log(value, value2);
-};
-var passToWriteCounter = (err, fileData) => {
-  writeCounter(fileData, testFunction);
-};
+
 
 // a function that takes no arguments
-exports.getNextUniqueId = () => {
+exports.getNextUniqueId = (callback) => {
   // reassign the global counter variable to have a value of itself plus one.
-  // counter = counter + 1;
-  
-  readCounter(passToWriteCounter);
-  // return the zero-padded string form of the counter. 
-  return zeroPaddedNumber(counter);
+  var incrementCounter = (err, fileData) => {
+    console.log('incrementCounter invoked!');
+    counter = fileData + 1;
+    writeCounter(counter, callback);
+  };
+  readCounter(incrementCounter);
 };
 
 
